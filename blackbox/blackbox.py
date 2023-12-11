@@ -1,5 +1,6 @@
 import random
 import math
+import time
 
 class Packet:
     def __init__(self, size, start_time, end_time):
@@ -57,7 +58,7 @@ def simulate(links, router, size, time_between_packets):
 
         while router.queue and router.queue[0].end_time <= packet.end_time:
             packet = dequeue(router)
-            print("{0} {1} {2} {3} {4} {5} {6} {7}".format(packet.size, packet.start_time, packet.end_time, packet.pos, packet.dropped))
+            print("{0} {1} {2} {3} {4}".format(packet.size, packet.start_time, packet.end_time, packet.pos, packet.dropped))
 
         if packet.dropped:
             print("Packet {0} was dropped".format(packet.size))
