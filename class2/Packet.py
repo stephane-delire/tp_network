@@ -11,9 +11,10 @@ class Packet():
         self.times = []
         self.name = name
         self.dropped = False
+        self.pos = 0
     
     def __str__(self):
         """
         Méthode d'affichage de la classe Packet.
         """
-        return "I'm a packet !"
+        return self.name

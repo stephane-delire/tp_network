@@ -41,31 +41,45 @@ class Host():
     def calculate_time(self, packet):
         """
         Calcule le temps de transmission d'un paquet.
+        ! Il faut prendre le minimum entre la bandwidth de l'hôte et celle du routeur.
         """
-        time = packet.size / self.bandwidth
+        if self.bandwidth < self.link.pointA.bandwidth:
+            time = packet.size / self.bandwidth
+        else:
+            time = packet.size / self.link.pointA.bandwidth
         return time
     
     def receive_packet(self, packet):
         """
         Reçoit un paquet.
+        On imprime les résultats qui sont dans le paquet.
+        + Ajout du délais de réception du paquet.
         """
-        # Mauvaise idée ça :) ça crée une boucle infinie...
-        #self.queue.append(packet)
-        print(packet.times)
+
+        # Il ne reste que le délais de propagation du lien à ajouter
+        # pour avoir le temps total du paquet.
+        packet.times.append(packet.times[-1] + self.link.calculate_time(packet))
+        
+
+        # Méthode d'affichage des résultats
+        print("-"*75)
+        print("(" + packet.name + ") ", end=" ")
+        for t in packet.times:
+            print("|", end=" ")
+            t = "{0:.4f}".format(t)
+            print(t, end=" ")
+        print(" packet.pos : " + str(packet.pos), end=" ")
+        print("dropped : " + str(packet.dropped))
+
     def send_packet(self, packet):
         """
         Envoie un paquet.
         """
-        print("Host sent a packet !")
         # Initialisation du temps de départ du paquet
         packet.times.append(self.current_time)
         # Ajout du temps de transmission du paquet
         self.current_time += self.calculate_time(packet)
-        packet.times.append(self.current_time)
         # Envoie du paquet
         self.link.receive_packet(packet)
         # Retrait du paquet de la queue
         self.remove_packet(packet)
-
-        # Les paquets possèdent 2 temps, le temps de départ 
-        # et le temps d'arrivée (délais de transmission).

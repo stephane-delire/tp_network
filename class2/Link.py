@@ -42,10 +42,4 @@ class Link():
         """
         Reçoit un paquet.
         """
-        # prend le dernier temps du paquet
-        cumulate_time = packet.times[-1]
-        # ajoute le temps de propagation
-        cumulate_time += self.calculate_time(packet)
-        packet.times.append(cumulate_time)
         self.send_packet(packet)
-        # le paquet possède un troisième temps qui est le temps de propagation
