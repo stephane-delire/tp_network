@@ -13,6 +13,8 @@ class Host():
         self.current_time = 0
         # Vitesse de transmission de l'hôte bits/sec
         self.bandwidth = 1024
+        # Delta de temps à ajouter pour chaque paquet (scénario 3)
+        self.delta = 0
 
     def attach_link(self, link):
         """
@@ -92,7 +94,7 @@ class Host():
         # Initialisation du temps de départ du paquet
         packet.times.append(self.current_time)
         # Ajout du temps de transmission du paquet
-        self.current_time += self.calculate_time(packet)
+        self.current_time += self.calculate_time(packet) + self.delta
         # Envoie du paquet
         self.link.receive_packet(packet)
         # Retrait du paquet de la queue
