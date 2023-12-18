@@ -58,18 +58,32 @@ class Host():
 
         # Il ne reste que le délais de propagation du lien à ajouter
         # pour avoir le temps total du paquet.
-        packet.times.append(packet.times[-1] + self.link.calculate_time(packet))
+        #packet.times.append(packet.times[-1] + self.link.calculate_time(packet))
+        # UPDATE : pour afficher le paquet qui est droppé, comme dans la simulation
+        # C'est l'hote de réception qui print() les résultats, il faut légèrement
+        # adapter le code précédent.
+        if packet.dropped:
+            packet.times.append("False")
+        else:
+            packet.times.append(packet.times[-1] + self.link.calculate_time(packet))
         
 
         # Méthode d'affichage des résultats
-        print("-"*75)
-        print("(" + packet.name + ") ", end=" ")
+        # UPDATE : 
+        # L'affichage des paquets doit se faire de la sorte (un seul espace entre les données):
+        # nom du paquet | depart de l'hôte | arrivée dans le routeur | sortie du routeur | arrivée dans l'hôte | position du paquet | dropped
+        print(packet.name, end=" ")
+        # Affichage des temps
+        # Par question de lisibilité, on affiche les temps avec 3 chiffres après la virgule...
+        # Il suffit de modifier le format de la string, pour afficher plus de chiffres si besoin.
         for t in packet.times:
-            print("|", end=" ")
-            t = "{0:.4f}".format(t)
+            if t!= "False":
+                t = "{0:.3f}".format(t)
             print(t, end=" ")
-        print(" packet.pos : " + str(packet.pos), end=" ")
-        print("dropped : " + str(packet.dropped))
+        # Affichage de la position du paquet dans le routeur
+        print(packet.pos, end=" ")
+        # Affichage si le paquet est droppé ou non
+        print(packet.dropped)
 
     def send_packet(self, packet):
         """

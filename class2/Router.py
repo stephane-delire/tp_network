@@ -146,7 +146,12 @@ class Router():
         # ---
         # Il ne reste qu'à vérifier si le paquet a été droppé ou non.
         if packet.dropped:
-            pass
+            # Le paquet qui est droppé n'a pas de temps de sortie du routeur...
+            # On modifie donc la dernière valeur de la liste des temps.
+            packet.times[-1] = "False"
+            # UPDATE: dans le cas de la simulation, on envoie quand meme le paquet
+            # pour qu'il soit print par l'hôte de sortie.
+            self.send_packet(packet)
         else:
             # Le paquet n'a pas été droppé, on peut l'envoyer vers le lien de sortie.
             self.send_packet(packet)

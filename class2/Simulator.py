@@ -27,14 +27,14 @@ class Simulator():
         while self.hostA.queue:
             self.hostA.send_packet(self.hostA.queue[0])
         # debug de la mémoire du routeur :
-        print(self.router)
+        #print(self.router)
 
     def scenario1(self):
         self.hostA.add_packet(Packet(name="1", size=1024))
         self.hostA.add_packet(Packet(name="2", size=1024))
         self.hostA.add_packet(Packet(name="3", size=1024))
         # Goulot d'étranglement :
-        #self.hostB.bandwidth = 256
+        
         self.run()
 
 simulator = Simulator()
