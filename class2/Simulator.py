@@ -32,12 +32,17 @@ class Simulator():
     def scenario1(self):
         self.hostA.add_packet(Packet(name="1", size=1024))
         self.hostA.add_packet(Packet(name="2", size=1024))
-        self.hostA.add_packet(Packet(name="3", size=1024))
         # Goulot d'étranglement :
-        
+        # Diminution de la bande passante de l'hôte récepteur (B)
+        self.hostB.bandwidth = 512
+        # Comme le routeur à une mémoire de 2048 bits, il peut stocker 2 paquets de 1024 bits.
+        # Les paquets 1 et 2 sont donc stockés dans la mémoire du routeur, et la position du
+        # deuxième paquet doit être 1.
         self.run()
 
+# Instanciation de la classe Simulator
 simulator = Simulator()
+# Lancement de la simulation avec le scénario 1
 simulator.scenario1()
 
 
