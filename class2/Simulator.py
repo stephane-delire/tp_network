@@ -2,6 +2,7 @@ from Host import Host
 from Link import Link
 from Router import Router
 from Packet import Packet
+import random
 
 LIGHT_SPEED = 200000000
 
@@ -116,8 +117,51 @@ class Simulator():
     def scenario5(self):
         """
         Scénario 5 : Bonus, envoie aléatoire de paquets.
+        
+        En ayant des valeurs fixe de vitesse de transfert de données, pour garder un débit constant
+        tout en ayant un intervalle de temps aléatoire entre l'envoi de paquets.
+        La seule manière est de modifier la taille des paquets... De façon aléatoire, et de calculer
+        a chaque fois l'intervalle de temps à ajouter pour ne pas avoir de rejet de paquets.
+
+        Concernant le calcule de la distribution exponentielle, celle-ci se fait en deux étapes :
+        1) On génère des nombres aléatoires suivant une distribution exponentielle (positive ou négative)
+        2) On normalise ces nombres entre la taille maximum et minimale des paquets.
+        --> Voir le fichier distribution_expo.py pour plus de détails.
+        Dans ce scénario, nous avons utilisé une distribution exponentielle négative, ce qui privilégie
+        les paquets plus gros.
 
         """
+        # Diminution de la bande passante de l'hôte récepteur (B)
+        self.hostB.bandwidth = 512
+        # nombre de paquet à envoyer (dans cette simulation, 20 paquets car plus simple à visualiser)
+        # en cas de doute sur la distribution exponentielle, voir le fichier distribution_expo.py
+        nbr_packets = 20
+        # taille maximum des paquets
+        biggest_packet_size = 1024
+        # taille minimum des paquets
+        smallest_packet_size = 128
+        # On génère les nombres aléatoires suivant une distribution exponentielle
+        nums = []
+        lbda = -1.5
+        for i in range(nbr_packets):
+            temp = random.expovariate(lbda) + smallest_packet_size
+            nums.append(temp)
+        # On normalise les nombres entre la taille maximum et minimale des paquets.
+        min_num = min(nums)
+        max_num = max(nums)
+        for i in range(len(nums)):
+            nums[i] = (nums[i] - min_num) / (max_num - min_num) * (biggest_packet_size - smallest_packet_size) + smallest_packet_size
+            # Limite de nombre de décimales
+            nums[i] = round(nums[i], 0)
+        # On ajoute les paquets à la queue de l'hôte émetteur
+        for i in range(nbr_packets):
+            self.hostA.add_packet(Packet(name=str(i), size=nums[i]))
+        # On lance la simulation
+        self.run()
+        # TODO : Calculer l'intervalle de temps entre chaque envoie de paquet
+        # pour ne pas jetter de paquets, et avoir un débit constant sur le lien 2.
+        
+
 
 
 # Instanciation de la classe Simulator
@@ -130,3 +174,5 @@ simulator = Simulator()
 #simulator.scenario3()
 # Lancement de la simulation avec le scénario 4
 #simulator.scenario4()
+# Lancement de la simulation avec le scénario 5
+simulator.scenario5()
