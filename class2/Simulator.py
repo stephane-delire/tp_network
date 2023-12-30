@@ -24,7 +24,7 @@ class Simulator():
         self.l2.attach_pointA(self.router)
         self.l2.attach_pointB(self.hostB)
 
-        # Valeurs par défaut, utile pour le scénario 3 et 4
+        # Valeurs par défaut, utile pour le scénario 4
         self.nbr_packets = 1
         self.packet_time = 0
 
@@ -35,8 +35,10 @@ class Simulator():
                     self.hostA.send_packet(self.hostA.queue[0])
                 else:
                     break
-            # Ajout du temps d'attente au delta de l'hôte émetteur
-            self.hostA.delta += self.packet_time
+            # Il faut modifier le current_time de l'hôte émetteur
+            # Pour simuler son temps d'attente entre rafale de paquets.
+            # (scénario 4)
+            self.hostA.current_time += self.packet_time
 
     def scenario1(self):
         """
@@ -75,7 +77,7 @@ class Simulator():
         self.hostB.bandwidth = 512
         # Pour ce scénario, la taille des paquets doit être fixe
         packet_size = 1024
-        # Il faut calculer l'intervalle de temps entre l'envoi de deux paquets.
+        # Il faut calculer l'intervalle de temps entre l'envoi de deux(ou +) paquets.
         # Afin qu'il n'y ait pas de rejet de paquets, mais que l'hôte récepteur soit
         # toujours en train de recevoir des paquets.
         # L'intervalle de temps à ajouter est : 
@@ -101,12 +103,18 @@ class Simulator():
         self.hostB.bandwidth = 512
         # Pour ce scénario, la taille des paquets doit être fixe
         packet_size = 1024
+        # Augmentation de la taille de la mémoire du routeur
+        # pour qu'il puisse contenir des rafales de 3 paquets de 1024 bits.
+        self.router.queue_max_size = 2048 + 1024
         # Comme les paquets sont envoyés par rafale, il faut connaître la taille de la mémoire du routeur.
         # Et calculer ainsi le nombre de paquets à envoyer.
         self.nbr_packets = self.router.queue_max_size / packet_size
+        
         # Maintenant il faut calculer le temps que le routeur va prendre pour envoyer les paquets.
-        self.packet_time = (packet_size * self.nbr_packets) / self.hostB.bandwidth
-        # packet_time sera rajouté au delta de l'hôte émetteur, après chaque rafale.
+        # Le calcul est : 
+        self.packet_time = (packet_size / self.hostB.bandwidth) + (packet_size / self.hostA.bandwidth)
+        # packet_time sera rajouté au current_time de l'hôte émetteur, après chaque rafale.
+        
         # On ajoute les paquets à la queue de l'hôte émetteur
         # Dans cette simulation on ajoute 12 paquets.
         for i in range(12):
@@ -152,7 +160,7 @@ class Simulator():
         for i in range(len(nums)):
             nums[i] = (nums[i] - min_num) / (max_num - min_num) * (biggest_packet_size - smallest_packet_size) + smallest_packet_size
             # Limite de nombre de décimales
-            nums[i] = round(nums[i], 0)
+            nums[i] = int(round(nums[i], 0))
         # On ajoute les paquets à la queue de l'hôte émetteur
         for i in range(nbr_packets):
             self.hostA.add_packet(Packet(name=str(i), size=nums[i]))
@@ -173,6 +181,6 @@ simulator = Simulator()
 # Lancement de la simulation avec le scénario 3
 #simulator.scenario3()
 # Lancement de la simulation avec le scénario 4
-#simulator.scenario4()
+simulator.scenario4()
 # Lancement de la simulation avec le scénario 5
-simulator.scenario5()
+#simulator.scenario5()

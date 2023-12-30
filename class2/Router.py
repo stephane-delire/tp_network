@@ -70,7 +70,7 @@ class Router():
         """
 
         # Le paquet arrive dans le routeur, il faut donc imprimer à l'intérieur
-        # le temps qu'il a mis pour arriver.
+        # le temps qu'il a mis pour arriver,
         # le calcul est le délais de transmission (min entre celui de l'émetteur et du routeur)
         # + le temps de propagation du lien d'entrée.
         if self.bandwidth < self.pointA.pointA.bandwidth:
@@ -88,7 +88,7 @@ class Router():
         else:
             bandwidth_b = self.pointB.pointB.bandwidth
         transmission_b = packet.size / bandwidth_b
-        # transmission_b est donc le temps ou le paquet sort du router.
+        # transmission_b est donc le temps de transmission de sortie du routeur.
 
         # Calcul de la mémoire du routeur.
         # On a besoin théoriquement de garder en mémoire tout les paquets
@@ -116,7 +116,7 @@ class Router():
                 # il y a collision, on décrémente la mémoire temporaire.
                 temp_memory -= p[2]
                 # on augmente le compteur pour placer le paquet derrière.
-                count += 1
+                count = p[4] + 1
                 # on récupère le temps de sortie du dernier paquet.
                 if p[1] > last_packet_out:
                     last_packet_out = p[1]
@@ -128,19 +128,20 @@ class Router():
                 # Sinon, on drop le paquet.
                 else:
                     packet.dropped = True
-        self.memory.append((packet_in, packet_out, packet.size, packet.name, packet.pos, packet.dropped))
+
+        
         
         # ---
         # On imprime le temps passé dans le routeur, ce qui est la troisième valeur
         # demandé dans le tp.
-        # Si un paquet a la position 0 il est renvoyé directement.
-        if packet.pos == 0:
-            packet.times.append(packet_out)
-        # Sinon, il faut calculer son le temps qu'il a passé dans le routeur.
+        if last_packet_out == 0:
+            packet_out = packet_in + transmission_b
         else:
-            # on a la variable last_packet_out qui contient le temps de sortie du paquet précédent.
-            # et il suffit de lui ajouter le délais de transmission vers l'hôte de sortie.
-            packet.times.append(last_packet_out + packet_out)
+            packet_out = last_packet_out + transmission_b
+        packet.times.append(packet_out)
+        
+        # Sauvegarde dans la mémoire théorique du routeur.
+        self.memory.append((packet_in, packet_out, packet.size, packet.name, packet.pos, packet.dropped))
 
 
         # ---
