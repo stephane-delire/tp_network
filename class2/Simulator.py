@@ -29,6 +29,11 @@ class Simulator():
         self.packet_time = 0
 
     def run(self):
+        """
+        Fonction qui lance la simulation.
+        N'est active que pour les scénarios 1 à 4,
+        car le scénario 5 est plus complexe.
+        """
         while self.hostA.queue:
             for i in range(int(self.nbr_packets)):
                 if self.hostA.queue:
@@ -164,10 +169,25 @@ class Simulator():
         # On ajoute les paquets à la queue de l'hôte émetteur
         for i in range(nbr_packets):
             self.hostA.add_packet(Packet(name=str(i), size=nums[i]))
-        # On lance la simulation
-        self.run()
-        # TODO : Calculer l'intervalle de temps entre chaque envoie de paquet
-        # pour ne pas jetter de paquets, et avoir un débit constant sur le lien 2.
+        
+        # Simulation pour scénario 5
+        current_time = 0
+        while self.hostA.queue:
+            # On a besoin de controller le current_time de l'hôte émetteur
+            # pour savoir quand envoyer un paquet.
+            self.hostA.current_time = current_time
+            # On doit calculer le temps que le paquet va mettre pour quitter le routeur.
+            # On ne compte pas le dernier temps de propagation, car dès que la queue du routeur
+            # est vide, on envoie le paquet.
+            # TODO : voir si on peut remplir la queue du routeur avec plusieurs paquets ?
+            transmission_a = self.hostA.calculate_time(self.hostA.queue[0])
+            propagation_a = self.hostA.link.calculate_time(self.hostA.queue[0])
+            transmission_b = self.hostB.calculate_time(self.hostA.queue[0])
+            delta_time = transmission_a + propagation_a + transmission_b
+            current_time += delta_time
+            # On envoie le paquet
+            self.hostA.send_packet(self.hostA.queue[0])
+
         
 
 
@@ -181,6 +201,6 @@ simulator = Simulator()
 # Lancement de la simulation avec le scénario 3
 #simulator.scenario3()
 # Lancement de la simulation avec le scénario 4
-simulator.scenario4()
+#simulator.scenario4()
 # Lancement de la simulation avec le scénario 5
-#simulator.scenario5()
+simulator.scenario5()
